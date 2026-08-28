@@ -52,7 +52,8 @@ async function runExtractorProPdfToWord(config, uploadPath) {
 
   return withPage(async (page) => {
     await page.goto(config.url, { waitUntil: "networkidle", timeout: 60000 });
-    await loginToExtractorProIfConfigured(page, config.auth);
+    await loginToExtractorProIfConfigured(page, config.auth, downloadDir);
+    await ensureExtractorProHomeReady(page, downloadDir);
     await page.locator("button.category-card.iris").click();
     await page.getByRole("button", { name: /PDF to Word/i }).click();
     await page.setInputFiles("#file-input", uploadPath);
@@ -67,7 +68,7 @@ async function runExtractorProPdfToWord(config, uploadPath) {
   }, { downloadsPath: downloadDir });
 }
 
-async function loginToExtractorProIfConfigured(page, authConfig) {
+async function loginToExtractorProIfConfigured(page, authConfig, downloadDir) {
   if (!authConfig?.emailEnv || !authConfig?.passwordEnv) return;
 
   const email = process.env[authConfig.emailEnv];
@@ -79,7 +80,27 @@ async function loginToExtractorProIfConfigured(page, authConfig) {
   await page.locator('input[name="password"]').fill(password);
   await page.getByRole("button", { name: /^Login$/i }).last().click();
   await page.waitForLoadState("networkidle", { timeout: 60000 }).catch(() => {});
-  await page.waitForSelector("button.category-card.iris", { timeout: 60000 });
+
+  const loginStillVisible = await page.locator('input[name="password"]').isVisible().catch(() => false);
+  if (loginStillVisible) {
+    await saveDebugScreenshot(page, downloadDir, "extractorpro-login-failed.png");
+    throw new Error("ExtractorPro login did not complete. Check EXTRACTORPRO_EMAIL and EXTRACTORPRO_PASSWORD in .env.");
+  }
+}
+
+async function ensureExtractorProHomeReady(page, downloadDir) {
+  try {
+    await page.locator("button.category-card.iris").waitFor({ state: "visible", timeout: 60000 });
+  } catch {
+    await saveDebugScreenshot(page, downloadDir, "extractorpro-home-not-ready.png");
+    const visibleText = (await page.locator("body").innerText().catch(() => "")).slice(0, 500);
+    throw new Error(`ExtractorPro Convert card was not visible after login/navigation. Visible page text: ${visibleText}`);
+  }
+}
+
+async function saveDebugScreenshot(page, downloadDir, name) {
+  const screenshotPath = path.join(downloadDir, name);
+  await page.screenshot({ path: screenshotPath, fullPage: true }).catch(() => {});
 }
 
 async function waitForPossibleDownload(page, timeoutMs = 120000) {
