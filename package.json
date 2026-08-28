@@ -9,6 +9,7 @@
     "worker": "node src/localWorker.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.112.4",
     "express": "^4.19.2",
     "mammoth": "^1.8.0",
     "multer": "^2.0.2",

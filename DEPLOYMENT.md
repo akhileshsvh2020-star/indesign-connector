@@ -9,7 +9,24 @@ For the final system there are two practical options:
 1. Run this app locally on each InDesign computer. Users open `http://localhost:3000` on their own machine.
 2. Host a central website, then install a small local InDesign worker on each user's computer. The website sends jobs to the worker, and the worker controls local InDesign.
 
-The current project is built as a local worker/web app. It can be pushed to GitHub, but deploying this exact Node/Playwright/InDesign worker to Vercel will not complete the InDesign part by itself.
+The current project supports option 2 by adding a hosted job API plus local worker polling.
+
+## Supabase
+
+Vercel does not keep local files or in-memory queues permanently. Supabase is used for production because it provides both:
+
+- Database rows for job status, assignment, logs, and results.
+- Private file storage for uploaded PDFs.
+
+Setup:
+
+1. Create a Supabase project.
+2. Open the SQL editor and run `supabase-schema.sql`.
+3. Create a private Storage bucket named `indesign-jobs`.
+4. Add environment variables in Vercel and on local worker computers:
+   - `SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+5. Set `storage.provider` to `supabase` in production config.
 
 ## ExtractorPro login
 
@@ -26,8 +43,7 @@ EXTRACTORPRO_EMAIL=your-email
 EXTRACTORPRO_PASSWORD=your-password
 ```
 
-The app will log in to ExtractorPro automatically before using `Convert -> PDF to Word`.
-
+The worker will log in to ExtractorPro automatically before using `Convert -> PDF to Word`.
 
 ## Worker assignment
 

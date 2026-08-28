@@ -3,10 +3,11 @@ import multer from "multer";
 import fs from "node:fs";
 import path from "node:path";
 import { loadConfig } from "./config.js";
-import { appendLog, createJob, getJob, listJobs, nextQueuedJob, updateJob } from "./jobStore.js";
+import { createStore } from "./stores/createStore.js";
 import { startWorker } from "./worker.js";
 
 const config = loadConfig();
+const store = createStore(config);
 const app = express();
 const uploadDir = path.resolve("storage", "uploads");
 
@@ -18,35 +19,48 @@ const upload = multer({ dest: uploadDir });
 app.use(express.json());
 app.use(express.static(path.resolve("public")));
 
+function asyncRoute(handler) {
+  return (request, response, next) => {
+    Promise.resolve(handler(request, response, next)).catch(next);
+  };
+}
+
 app.get("/api/config", (_request, response) => {
   response.json({ workers: config.workers ?? [] });
 });
 
-app.get("/api/jobs", (_request, response) => {
-  response.json({ jobs: listJobs() });
-});
+app.get("/api/jobs", asyncRoute(async (_request, response) => {
+  response.json({ jobs: await store.listJobs() });
+}));
 
-app.get("/api/jobs/:id", (request, response) => {
-  const job = getJob(request.params.id);
+app.get("/api/jobs/:id", asyncRoute(async (request, response) => {
+  const job = await store.getJob(request.params.id);
   if (!job) {
     response.status(404).json({ error: "Job not found." });
     return;
   }
 
   response.json({ job });
-});
+}));
 
-app.get("/api/jobs/:id/file", (request, response) => {
-  const job = getJob(request.params.id);
+app.get("/api/jobs/:id/file", asyncRoute(async (request, response) => {
+  const job = await store.getJob(request.params.id);
   if (!job) {
     response.status(404).json({ error: "Job not found." });
     return;
   }
 
-  response.download(path.resolve(job.uploadPath), job.originalName);
-});
+  const file = await store.getUploadedFile(job);
+  response.setHeader("content-disposition", `attachment; filename="${encodeURIComponent(file.filename)}"`);
+  if (file.buffer) {
+    response.send(file.buffer);
+    return;
+  }
 
-app.post("/api/jobs", upload.single("file"), (request, response) => {
+  file.stream.pipe(response);
+}));
+
+app.post("/api/jobs", upload.single("file"), asyncRoute(async (request, response) => {
   if (!request.file) {
     response.status(400).json({ error: "Upload a file first." });
     return;
@@ -59,43 +73,48 @@ app.post("/api/jobs", upload.single("file"), (request, response) => {
     return;
   }
 
-  const job = createJob(request.file, { assignedTo });
+  const job = await store.createJob(request.file, { assignedTo });
   response.status(201).json({ job });
-});
+}));
 
-app.post("/api/workers/:workerId/claim", (request, response) => {
-  const job = nextQueuedJob(request.params.workerId);
+app.post("/api/workers/:workerId/claim", asyncRoute(async (request, response) => {
+  const job = await store.claimJob(request.params.workerId);
   response.json({ job: job ?? null });
-});
+}));
 
-app.post("/api/jobs/:id/log", (request, response) => {
+app.post("/api/jobs/:id/log", asyncRoute(async (request, response) => {
   const { message } = request.body ?? {};
   if (!message) {
     response.status(400).json({ error: "message is required." });
     return;
   }
 
-  const job = appendLog(request.params.id, message);
+  const job = await store.appendLog(request.params.id, message);
   if (!job) {
     response.status(404).json({ error: "Job not found." });
     return;
   }
 
   response.json({ job });
-});
+}));
 
-app.patch("/api/jobs/:id", (request, response) => {
-  const job = updateJob(request.params.id, request.body ?? {});
+app.patch("/api/jobs/:id", asyncRoute(async (request, response) => {
+  const job = await store.updateJob(request.params.id, request.body ?? {});
   if (!job) {
     response.status(404).json({ error: "Job not found." });
     return;
   }
 
   response.json({ job });
+}));
+
+app.use((error, _request, response, _next) => {
+  console.error(error);
+  response.status(500).json({ error: error instanceof Error ? error.message : String(error) });
 });
 
 if (config.embeddedWorker?.enabled) {
-  startWorker(config, config.embeddedWorker.workerId);
+  startWorker(config, config.embeddedWorker.workerId, store);
 }
 
 app.listen(config.port, "0.0.0.0", () => {

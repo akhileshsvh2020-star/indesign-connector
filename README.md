@@ -1,6 +1,6 @@
 # InDesign Connector
 
-A local web app for accepting uploaded PDFs from a small group of users, sending each job through ExtractorPro, pasting the copied text into Adobe InDesign, then handling `$...$` math expressions one by one through MathML conversion.
+A local/web hybrid app for accepting uploaded PDFs from a small group of users, sending each job through ExtractorPro, pasting the copied text into Adobe InDesign, then handling `$...$` math expressions one by one through MathML conversion.
 
 ## First setup
 
@@ -31,6 +31,33 @@ npm run worker
 
 In `worker.config.json`, set `workerId` to the matching user name and set `apiBaseUrl` to the hosted website URL.
 
+## Storage
+
+The app supports two storage modes:
+
+- `memory`: local testing only. Jobs disappear when the server restarts.
+- `supabase`: production mode for Vercel. Jobs are stored in Supabase Database and uploaded files are stored in Supabase Storage.
+
+To prepare Supabase:
+
+1. Create a Supabase project.
+2. Run `supabase-schema.sql` in the Supabase SQL editor.
+3. Create a private Storage bucket named `indesign-jobs`.
+4. Set these environment variables:
+
+```text
+SUPABASE_URL=your-project-url
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+Then change `config.json`:
+
+```json
+"storage": {
+  "provider": "supabase"
+}
+```
+
 ## Workflow status
 
 Implemented:
@@ -39,6 +66,8 @@ Implemented:
 - Job assignment by user name.
 - Worker claim API for local InDesign computers.
 - Separate `npm run worker` local-worker command.
+- Memory storage for local testing.
+- Supabase database/file storage support for Vercel production.
 - ExtractorPro PDF to Word workflow.
 - Optional ExtractorPro login through `.env`.
 - Raw copied text is pasted into InDesign before equation processing.
@@ -50,6 +79,8 @@ Implemented:
 
 Still needs:
 
+- Supabase project credentials from you.
+- GitHub repository URL for pushing.
+- Vercel project connection after GitHub push.
 - A real PDF end-to-end test on an InDesign computer.
 - Final automation for `Window -> Maths expression -> Insert MathML -> Place`.
-- Hosted storage/database setup before Vercel deployment, because the current queue is in memory.

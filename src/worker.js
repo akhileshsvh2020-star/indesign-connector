@@ -1,12 +1,15 @@
-import { appendLog, finishActiveJob, nextQueuedJob, updateJob } from "./jobStore.js";
 import { readUploadedFile } from "./fileReaders.js";
 import { splitDollarMath } from "./math.js";
 import { convertEquationToMathML, runSourceWebsiteWorkflow } from "./workflow/browserWorkflow.js";
 import { createInitialPasteScript, createMathInsertionPlan, runInDesignScript } from "./workflow/indesign.js";
 
 export async function processJob(job, config, callbacks = {}) {
-  const log = callbacks.log ?? ((message) => appendLog(job.id, message));
-  const update = callbacks.update ?? ((patch) => updateJob(job.id, patch));
+  const log = callbacks.log;
+  const update = callbacks.update;
+
+  if (!log || !update) {
+    throw new Error("processJob requires log and update callbacks.");
+  }
 
   try {
     await update({ status: "running", error: null });
@@ -63,20 +66,19 @@ export async function processJob(job, config, callbacks = {}) {
   }
 }
 
-export function startWorker(config, workerId = config.embeddedWorker?.workerId) {
+export function startWorker(config, workerId, store) {
   async function tick() {
-    if (!workerId) return;
-    const job = nextQueuedJob(workerId);
+    if (!workerId || !store) return;
+    const job = await store.claimJob(workerId);
     if (!job) return;
 
-    try {
-      await processJob(job, config);
-    } finally {
-      finishActiveJob(job.id);
-    }
+    await processJob(job, config, {
+      log: (message) => store.appendLog(job.id, message),
+      update: (patch) => store.updateJob(job.id, patch)
+    });
   }
 
   setInterval(() => {
-    tick().catch(() => {});
+    tick().catch((error) => console.error(error));
   }, 1500);
 }

@@ -40,5 +40,13 @@
   "embeddedWorker": {
     "enabled": true,
     "workerId": "akhilesh"
+  },
+  "storage": {
+    "provider": "memory",
+    "supabase": {
+      "urlEnv": "SUPABASE_URL",
+      "serviceRoleKeyEnv": "SUPABASE_SERVICE_ROLE_KEY",
+      "bucket": "indesign-jobs"
+    }
   }
 }
