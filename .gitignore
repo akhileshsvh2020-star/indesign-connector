@@ -3,3 +3,4 @@ storage/
 .env
 .vercel/
 npm-debug.log*
+supabase-keys.txt
