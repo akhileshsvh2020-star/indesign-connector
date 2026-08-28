@@ -1,0 +1,26 @@
+{
+  "port": 3000,
+  "publicBaseUrl": "http://localhost:3000",
+  "sourceWebsite": {
+    "provider": "extractorpro",
+    "url": "https://extractorpro.in/",
+    "auth": {
+      "emailEnv": "EXTRACTORPRO_EMAIL",
+      "passwordEnv": "EXTRACTORPRO_PASSWORD"
+    },
+    "downloadTimeoutMs": 180000
+  },
+  "mathConverter": {
+    "url": "https://osanshouo.github.io/latex2mathml-web/index.html",
+    "inputSelector": "#story",
+    "convertSelector": "#convert",
+    "outputSelector": "#output-text",
+    "waitForText": "<math"
+  },
+  "indesign": {
+    "enabled": false,
+    "applicationProgId": "InDesign.Application",
+    "normalPointSize": 12,
+    "equationScale": 0.5
+  }
+}

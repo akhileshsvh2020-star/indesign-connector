@@ -1,0 +1,191 @@
+:root {
+  color-scheme: light;
+  --ink: #18202a;
+  --muted: #687385;
+  --line: #d9e0e9;
+  --panel: #ffffff;
+  --page: #f4f7fb;
+  --accent: #0f766e;
+  --accent-strong: #134e4a;
+  --warn: #9a3412;
+  --bad: #b91c1c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--page);
+  color: var(--ink);
+}
+
+.app-shell {
+  width: min(1120px, calc(100vw - 32px));
+  margin: 32px auto;
+}
+
+.toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 34px;
+  line-height: 1.1;
+}
+
+.upload-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+input[type="file"] {
+  width: 280px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+button {
+  min-height: 42px;
+  border: 0;
+  background: var(--accent);
+  color: #fff;
+  padding: 0 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--accent-strong);
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 24px 0;
+}
+
+.status-grid article {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 18px;
+}
+
+.status-grid span {
+  display: block;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.status-grid p,
+.job-meta,
+.job-log,
+.job-result {
+  color: var(--muted);
+}
+
+.jobs-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.jobs-list {
+  display: grid;
+}
+
+.job {
+  padding: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.job:last-child {
+  border-bottom: 0;
+}
+
+.job-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.badge {
+  min-width: 82px;
+  text-align: center;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: #e6fffb;
+  color: var(--accent-strong);
+}
+
+.badge.failed {
+  background: #fee2e2;
+  color: var(--bad);
+}
+
+.badge.running {
+  background: #ffedd5;
+  color: var(--warn);
+}
+
+.job-log {
+  margin-top: 10px;
+  white-space: pre-wrap;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 13px;
+}
+
+.job-result {
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .toolbar,
+  .upload-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  input[type="file"] {
+    width: 100%;
+  }
+
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+}
