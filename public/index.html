@@ -14,7 +14,9 @@
           <h1>InDesign Connector</h1>
         </div>
         <form id="uploadForm" class="upload-form">
-          <input id="fileInput" name="file" type="file" required>
+          <label class="field-label" for="assignedTo">User</label>
+          <select id="assignedTo" name="assignedTo" required></select>
+          <input id="fileInput" name="file" type="file" accept="application/pdf,.pdf" required>
           <button type="submit">Upload job</button>
         </form>
       </section>
@@ -42,6 +44,6 @@
         <div id="jobsList" class="jobs-list"></div>
       </section>
     </main>
-    <script src="/app.js"></script>
+    <script type="module" src="/app.js"></script>
   </body>
 </html>

@@ -61,8 +61,16 @@ h1 {
   gap: 10px;
 }
 
-input[type="file"] {
+.field-label {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+input[type="file"],
+select {
   width: 280px;
+  min-height: 42px;
   padding: 10px;
   border: 1px solid var(--line);
   background: var(--panel);
@@ -181,7 +189,8 @@ button:hover {
     flex-direction: column;
   }
 
-  input[type="file"] {
+  input[type="file"],
+  select {
     width: 100%;
   }
 

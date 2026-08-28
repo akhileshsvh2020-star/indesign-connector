@@ -28,3 +28,18 @@ EXTRACTORPRO_PASSWORD=your-password
 
 The app will log in to ExtractorPro automatically before using `Convert -> PDF to Word`.
 
+
+## Worker assignment
+
+Jobs are assigned by user name. Each InDesign computer should have a different `workerId` in `worker.config.json`.
+
+Example:
+
+```json
+{
+  "workerId": "akhilesh",
+  "apiBaseUrl": "https://your-vercel-site.vercel.app"
+}
+```
+
+When the worker runs with `npm run worker`, it polls the website for jobs assigned to that user, downloads the uploaded PDF, processes it locally, and reports status back to the website.

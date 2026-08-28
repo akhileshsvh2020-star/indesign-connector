@@ -1,5 +1,6 @@
 const form = document.querySelector("#uploadForm");
 const fileInput = document.querySelector("#fileInput");
+const assignedTo = document.querySelector("#assignedTo");
 const jobsList = document.querySelector("#jobsList");
 const refreshButton = document.querySelector("#refreshButton");
 const counters = {
@@ -21,6 +22,14 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+async function loadConfig() {
+  const response = await fetch("/api/config");
+  const data = await response.json();
+  assignedTo.innerHTML = data.workers.map((worker) => (
+    `<option value="${escapeHtml(worker.id)}">${escapeHtml(worker.name)}</option>`
+  )).join("");
 }
 
 function renderJobs(jobs) {
@@ -51,7 +60,7 @@ function renderJobs(jobs) {
         <div class="job-title">
           <div>
             <strong>${escapeHtml(job.originalName)}</strong>
-            <p class="job-meta">${escapeHtml(new Date(job.createdAt).toLocaleString())}</p>
+            <p class="job-meta">Assigned to ${escapeHtml(job.assignedTo)} · ${escapeHtml(new Date(job.createdAt).toLocaleString())}</p>
           </div>
           <span class="${statusClass(job.status)}">${escapeHtml(job.status)}</span>
         </div>
@@ -71,7 +80,10 @@ async function loadJobs() {
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (!fileInput.files[0]) return;
+
   const formData = new FormData();
+  formData.append("assignedTo", assignedTo.value);
   formData.append("file", fileInput.files[0]);
 
   const response = await fetch("/api/jobs", {
@@ -91,4 +103,5 @@ form.addEventListener("submit", async (event) => {
 
 refreshButton.addEventListener("click", loadJobs);
 setInterval(loadJobs, 3000);
+await loadConfig();
 loadJobs();
