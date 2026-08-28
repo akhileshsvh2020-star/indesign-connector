@@ -13,6 +13,18 @@ const defaultConfig = {
     applicationProgId: "InDesign.Application",
     normalPointSize: 12,
     equationScale: 0.5
+  },
+  embeddedWorker: {
+    enabled: false,
+    workerId: "akhilesh"
+  },
+  storage: {
+    provider: "memory",
+    supabase: {
+      urlEnv: "SUPABASE_URL",
+      serviceRoleKeyEnv: "SUPABASE_SERVICE_ROLE_KEY",
+      bucket: "indesign-jobs"
+    }
   }
 };
 
@@ -37,19 +49,52 @@ function loadDotEnv() {
   }
 }
 
+function applyRuntimeOverrides(config) {
+  if (!process.env.VERCEL) return config;
+
+  return {
+    ...config,
+    publicBaseUrl: process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : config.publicBaseUrl,
+    embeddedWorker: {
+      ...(config.embeddedWorker ?? {}),
+      enabled: false
+    },
+    storage: {
+      ...(config.storage ?? {}),
+      provider: "supabase",
+      supabase: {
+        ...defaultConfig.storage.supabase,
+        ...(config.storage?.supabase ?? {})
+      }
+    }
+  };
+}
+
 export function loadConfig() {
   const configPath = path.resolve("config.json");
   if (!fs.existsSync(configPath)) {
-    return defaultConfig;
+    return applyRuntimeOverrides(defaultConfig);
   }
 
   const userConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
-  return {
+  return applyRuntimeOverrides({
     ...defaultConfig,
     ...userConfig,
     indesign: {
       ...defaultConfig.indesign,
       ...(userConfig.indesign ?? {})
+    },
+    embeddedWorker: {
+      ...defaultConfig.embeddedWorker,
+      ...(userConfig.embeddedWorker ?? {})
+    },
+    storage: {
+      ...defaultConfig.storage,
+      ...(userConfig.storage ?? {}),
+      supabase: {
+        ...defaultConfig.storage.supabase,
+        ...(userConfig.storage?.supabase ?? {})
+      }
     }
-  };
+  });
 }

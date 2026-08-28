@@ -2,22 +2,26 @@ import express from "express";
 import multer from "multer";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { loadConfig } from "./config.js";
 import { createStore } from "./stores/createStore.js";
-import { startWorker } from "./worker.js";
 
 const config = loadConfig();
 const store = createStore(config);
 const app = express();
-const uploadDir = path.resolve("storage", "uploads");
+const isVercel = Boolean(process.env.VERCEL);
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const uploadDir = isVercel ? path.join("/tmp", "indesign-uploads") : path.resolve("storage", "uploads");
 
 fs.mkdirSync(uploadDir, { recursive: true });
-fs.mkdirSync(path.resolve("storage", "outputs"), { recursive: true });
+if (!isVercel) {
+  fs.mkdirSync(path.resolve("storage", "outputs"), { recursive: true });
+}
 
 const upload = multer({ dest: uploadDir });
 
 app.use(express.json());
-app.use(express.static(path.resolve("public")));
+app.use(express.static(path.join(projectRoot, "public")));
 
 function asyncRoute(handler) {
   return (request, response, next) => {
@@ -113,10 +117,15 @@ app.use((error, _request, response, _next) => {
   response.status(500).json({ error: error instanceof Error ? error.message : String(error) });
 });
 
-if (config.embeddedWorker?.enabled) {
+if (!isVercel && config.embeddedWorker?.enabled) {
+  const { startWorker } = await import("./worker.js");
   startWorker(config, config.embeddedWorker.workerId, store);
 }
 
-app.listen(config.port, "0.0.0.0", () => {
-  console.log(`InDesign Connector running at http://localhost:${config.port}`);
-});
+if (!isVercel) {
+  app.listen(config.port, "0.0.0.0", () => {
+    console.log(`InDesign Connector running at http://localhost:${config.port}`);
+  });
+}
+
+export default app;
