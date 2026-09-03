@@ -79,12 +79,16 @@ async function loginToExtractorProIfConfigured(page, authConfig, downloadDir) {
   await page.locator('input[name="email"]').fill(email);
   await page.locator('input[name="password"]').fill(password);
   await page.getByRole("button", { name: /^Login$/i }).last().click();
-  await page.waitForLoadState("networkidle", { timeout: 60000 }).catch(() => {});
 
-  const loginStillVisible = await page.locator('input[name="password"]').isVisible().catch(() => false);
-  if (loginStillVisible) {
+  const convertCard = page.locator("button.category-card.iris");
+  const loginCompleted = await convertCard.waitFor({ state: "visible", timeout: 30000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (!loginCompleted) {
     await saveDebugScreenshot(page, downloadDir, "extractorpro-login-failed.png");
-    throw new Error("ExtractorPro login did not complete. Check EXTRACTORPRO_EMAIL and EXTRACTORPRO_PASSWORD in .env.");
+    const visibleText = (await page.locator("body").innerText().catch(() => "")).slice(0, 500);
+    throw new Error(`ExtractorPro login did not reach the main Convert page. Check .env credentials or login prompts. Visible page text: ${visibleText}`);
   }
 }
 
