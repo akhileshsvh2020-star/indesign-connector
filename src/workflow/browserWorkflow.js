@@ -104,26 +104,38 @@ async function runExtractorProPdfToWord(config, uploadPath) {
 }
 
 async function loginToExtractorProIfConfigured(page, authConfig, downloadDir) {
-  if (!authConfig?.emailEnv || !authConfig?.passwordEnv) return;
-
-  const email = process.env[authConfig.emailEnv];
-  const password = process.env[authConfig.passwordEnv];
-  if (!email || !password) return;
-
-  await page.locator("button.profile-trigger").click();
-  await page.locator('input[name="email"]').fill(email);
-  await page.locator('input[name="password"]').fill(password);
-  await page.getByRole("button", { name: /^Login$/i }).last().click();
-
   const convertCard = page.locator("button.category-card.iris");
-  const loginCompleted = await convertCard.waitFor({ state: "visible", timeout: 30000 })
+  const alreadyLoggedIn = await convertCard.waitFor({ state: "visible", timeout: 5000 })
     .then(() => true)
     .catch(() => false);
 
-  if (!loginCompleted) {
+  if (alreadyLoggedIn) return;
+
+  const email = authConfig?.emailEnv ? process.env[authConfig.emailEnv] : "";
+  const password = authConfig?.passwordEnv ? process.env[authConfig.passwordEnv] : "";
+
+  if (email && password) {
+    await page.locator("button.profile-trigger").click();
+    await page.locator('input[name="email"]').fill(email);
+    await page.locator('input[name="password"]').fill(password);
+    await page.getByRole("button", { name: /^Login$/i }).last().click();
+
+    const loginCompleted = await convertCard.waitFor({ state: "visible", timeout: 30000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (loginCompleted) return;
+  }
+
+  console.log("ExtractorPro is not logged in. Login manually in the Chrome window now; waiting up to 5 minutes...");
+  const manuallyLoggedIn = await convertCard.waitFor({ state: "visible", timeout: 300000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (!manuallyLoggedIn) {
     await saveDebugScreenshot(page, downloadDir, "extractorpro-login-failed.png");
     const visibleText = (await page.locator("body").innerText().catch(() => "")).slice(0, 500);
-    throw new Error(`ExtractorPro login did not reach the main Convert page. Check .env credentials or login prompts. Visible page text: ${visibleText}`);
+    throw new Error(`ExtractorPro login did not reach the main Convert page after waiting for manual login. Visible page text: ${visibleText}`);
   }
 }
 
