@@ -1,9 +1,44 @@
 import { chromium } from "playwright";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { existsSync } from "node:fs";
+import os from "node:os";
 import { readDocxText } from "../fileReaders.js";
 
+function findInstalledChrome() {
+  const candidates = [
+    process.env.CHROME_PATH,
+    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+  ].filter(Boolean);
+
+  return candidates.find((candidate) => existsSync(candidate));
+}
+
+function getConnectorProfileDir() {
+  return path.join(os.homedir(), "AppData", "Local", "InDesignConnector", "ChromeProfile");
+}
+
 async function withPage(task, options = {}) {
+  const installedChrome = findInstalledChrome();
+  const useInstalledChrome = process.env.USE_INSTALLED_CHROME !== "false" && installedChrome;
+
+  if (useInstalledChrome) {
+    const context = await chromium.launchPersistentContext(getConnectorProfileDir(), {
+      executablePath: installedChrome,
+      headless: false,
+      acceptDownloads: true,
+      viewport: { width: 1366, height: 768 },
+      ...(options.downloadsPath ? { downloadsPath: options.downloadsPath } : {})
+    });
+    const page = await context.newPage();
+    try {
+      return await task(page);
+    } finally {
+      await context.close();
+    }
+  }
+
   const browser = await chromium.launch({ headless: false });
   const context = await browser.newContext({
     acceptDownloads: true,
