@@ -58,6 +58,16 @@ Then change `config.json`:
 }
 ```
 
+
+## Python/Pterodactyl server
+
+This repo also includes a Python server version for Pterodactyl hosting:
+
+- `app.py`
+- `requirements.txt`
+- `PYTHON-SERVER-SETUP.md`
+
+The Python server keeps the same upload, job list, file download, worker claim, log, and status APIs used by the existing frontend and local worker. It stores uploaded PDFs and job state locally in `server-data/` with SQLite.
 ## Workflow status
 
 Implemented:
@@ -84,3 +94,4 @@ Still needs:
 - Vercel project connection after GitHub push.
 - A real PDF end-to-end test on an InDesign computer.
 - Final automation for `Window -> Maths expression -> Insert MathML -> Place`.
+

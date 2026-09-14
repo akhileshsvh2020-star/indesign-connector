@@ -4,3 +4,7 @@ storage/
 .vercel/
 npm-debug.log*
 supabase-keys.txt
+
+__pycache__/
+*.pyc
+server-data/
