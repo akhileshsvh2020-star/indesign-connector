@@ -8,3 +8,7 @@ supabase-keys.txt
 __pycache__/
 *.pyc
 server-data/
+
+dist/
+
+connector-dist/

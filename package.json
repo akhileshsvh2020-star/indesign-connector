@@ -4,9 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "connector": "electron electron/main.cjs",
     "dev": "node src/server.js",
     "start": "node src/server.js",
-    "worker": "node src/localWorker.js"
+    "worker": "node src/localWorker.js",
+    "package:connector": "electron-builder --win"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
@@ -14,5 +16,31 @@
     "mammoth": "^1.8.0",
     "multer": "^2.0.2",
     "playwright": "^1.46.0"
-  }
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "in.extractorpro.indesignconnector",
+    "productName": "InDesign Connector",
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "public/**/*",
+      "package.json",
+      "worker.config.example.json",
+      "config.example.json",
+      "start-worker.bat"
+    ],
+    "win": {
+      "target": "dir",
+      "signAndEditExecutable": false
+    },
+    "directories": {
+      "output": "connector-dist"
+    },
+    "asar": false
+  },
+  "main": "electron/main.cjs"
 }

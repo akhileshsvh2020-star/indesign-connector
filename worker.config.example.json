@@ -1,6 +1,6 @@
 {
   "workerId": "akhilesh",
-  "apiBaseUrl": "http://localhost:3000",
+  "apiBaseUrl": "http://indesign.extractorpro.in:10039",
   "pollIntervalMs": 3000,
   "sourceWebsite": {
     "provider": "extractorpro",

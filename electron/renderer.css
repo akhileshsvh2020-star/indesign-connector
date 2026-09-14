@@ -1,0 +1,36 @@
+:root {
+  color-scheme: light;
+  font-family: Inter, Segoe UI, Arial, sans-serif;
+  background: #eef3f9;
+  color: #061728;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: #eef3f9; }
+.shell { width: min(980px, calc(100vw - 48px)); margin: 32px auto; }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 20px; }
+.eyebrow { margin: 0 0 8px; color: #007a6d; font-size: 12px; font-weight: 800; letter-spacing: 0; text-transform: uppercase; }
+h1, h2 { margin: 0; }
+h1 { font-size: 34px; }
+h2 { font-size: 20px; }
+.badge { min-width: 112px; padding: 10px 14px; border: 1px solid #cfd9e6; background: #fff; color: #4d5e73; text-align: center; font-weight: 800; }
+.badge.running { border-color: #9bd7c4; background: #e9f8f2; color: #007a55; }
+.badge.error { border-color: #f1b8b8; background: #fff0f0; color: #b42318; }
+.panel { border: 1px solid #d6e0ec; background: #fff; padding: 18px; margin-bottom: 18px; }
+.meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+.meta-grid div { border: 1px solid #d6e0ec; padding: 14px; min-width: 0; }
+.meta-grid span { display: block; margin-bottom: 8px; color: #607089; font-size: 13px; }
+.meta-grid strong { display: block; overflow-wrap: anywhere; font-size: 15px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+button { border: 1px solid #c9d5e2; background: #fff; color: #061728; padding: 11px 14px; font-weight: 800; cursor: pointer; }
+button:hover { border-color: #007a6d; }
+button:disabled { cursor: not-allowed; opacity: 0.55; }
+button.primary { border-color: #007a6d; background: #007a6d; color: #fff; }
+.logs-panel { min-height: 330px; }
+.logs-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+#logs { height: 300px; margin: 0; overflow: auto; border: 1px solid #d6e0ec; background: #08111f; color: #dbeafe; padding: 14px; white-space: pre-wrap; }
+@media (max-width: 760px) {
+  .shell { width: calc(100vw - 28px); margin: 20px auto; }
+  .header, .meta-grid { grid-template-columns: 1fr; }
+  .header { align-items: flex-start; flex-direction: column; }
+}

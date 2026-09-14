@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>InDesign Connector</title>
+    <link rel="stylesheet" href="renderer.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="header">
+        <div>
+          <p class="eyebrow">Adobe Automation Queue</p>
+          <h1>InDesign Connector</h1>
+        </div>
+        <span id="statusBadge" class="badge">Stopped</span>
+      </section>
+
+      <section class="panel">
+        <div class="meta-grid">
+          <div>
+            <span>Worker</span>
+            <strong id="workerId">-</strong>
+          </div>
+          <div>
+            <span>Server</span>
+            <strong id="apiBaseUrl">-</strong>
+          </div>
+          <div>
+            <span>Credentials</span>
+            <strong id="envState">-</strong>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="startButton" class="primary">Start Connector</button>
+          <button id="stopButton">Stop</button>
+          <button id="openWebsiteButton">Open Website</button>
+          <button id="openConfigButton">Worker Config</button>
+          <button id="openEnvButton">Credentials</button>
+          <button id="updateButton">Update Code</button>
+        </div>
+      </section>
+
+      <section class="panel logs-panel">
+        <div class="logs-header">
+          <h2>Logs</h2>
+          <button id="clearButton">Clear</button>
+        </div>
+        <pre id="logs"></pre>
+      </section>
+    </main>
+    <script src="renderer.js"></script>
+  </body>
+</html>
